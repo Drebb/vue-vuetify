@@ -74,7 +74,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 
 const escapeHTML = (text) => {
   if (/&|<|>|"|'|{|}|;|%|\.\.\/|\.\.$/g.test(text)) {
@@ -95,6 +95,14 @@ const categoryOrder = {
   Finished: 3,
 };
 
+
+onMounted(() => {
+  const savedTodos = localStorage.getItem('todos');
+  if (savedTodos) {
+    todos.value = JSON.parse(savedTodos);
+  }
+});
+
 watch(activeCategory, (newCategory) => {
   if (categories.includes(newCategory)) {
     activeCategory.value = newCategory;
@@ -112,6 +120,10 @@ const filteredTodos = computed(() => {
 
 const isDuplicateTask = (text) => {
   return todos.value.some(todo => todo.text.toLowerCase() === text.toLowerCase());
+};
+
+const saveTodosToLocalStorage = () => {
+  localStorage.setItem('todos', JSON.stringify(todos.value));
 };
 
 const addTodo = () => {
@@ -145,21 +157,32 @@ const addTodo = () => {
   todos.value.push({ id, text: sanitizedInput, completed: false, category: 'Tasks', expanded: false });
   newTodo.value = '';
   error.value = '';
+
+  saveTodosToLocalStorage();
 };
 
 const toggleExpand = (id) => {
   const task = todos.value.find(todo => todo.id === id);
-  if (task) task.expanded = !task.expanded;
+  if (task) {
+    task.expanded = !task.expanded;
+    saveTodosToLocalStorage();
+  }
 };
 
 const moveToInProgress = (id) => {
   const task = todos.value.find(todo => todo.id === id);
-  if (task) task.category = 'In Progress';
+  if (task) {
+    task.category = 'In Progress';
+    saveTodosToLocalStorage();
+  }
 };
 
 const moveToFinished = (id) => {
   const task = todos.value.find(todo => todo.id === id);
-  if (task) task.category = 'Finished';
+  if (task) {
+    task.category = 'Finished';
+    saveTodosToLocalStorage();
+  }
 };
 
 const moveBack = (id) => {
@@ -170,11 +193,13 @@ const moveBack = (id) => {
     } else if (task.category === 'In Progress') {
       task.category = 'Tasks';
     }
+    saveTodosToLocalStorage();
   }
 };
 
 const deleteTodo = (id) => {
   todos.value = todos.value.filter(todo => todo.id !== id);
+  saveTodosToLocalStorage();
 };
 
 </script>
