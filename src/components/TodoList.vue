@@ -77,7 +77,7 @@
 import { ref, computed, watch } from 'vue';
 
 const escapeHTML = (text) => {
-  if (/&|<|>|"|'|{|}|;|%|../g.test(text)) {
+  if (/&|<|>|"|'|{|}|;|%|\.\.\/|\.\.$/g.test(text)) {
     return null;
   }
   return text.trim();
